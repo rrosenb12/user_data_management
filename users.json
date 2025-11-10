@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "firstName": "John",
+    "lastName": "Doe",
+    "bio": "Software engineer passionate about building scalable applications and open-source contributions.",
+    "dateOfBirth": "1990-05-15",
+    "location": "San Francisco, CA"
+  },
+  {
+    "id": 2,
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "bio": "Data scientist with expertise in machine learning and statistical analysis. Love exploring new datasets.",
+    "dateOfBirth": "1988-03-22",
+    "location": "New York, NY"
+  },
+  {
+    "id": 3,
+    "firstName": "Michael",
+    "lastName": "Johnson",
+    "bio": "Full-stack developer specializing in React and Node.js. Always learning new technologies.",
+    "dateOfBirth": "1992-11-08",
+    "location": "Seattle, WA"
+  },
+  {
+    "id": 4,
+    "firstName": "Emily",
+    "lastName": "Williams",
+    "bio": "Product designer focused on creating intuitive user experiences. Passionate about accessibility and inclusive design.",
+    "dateOfBirth": "1991-07-14",
+    "location": "Austin, TX"
+  },
+  {
+    "id": 5,
+    "firstName": "David",
+    "lastName": "Brown",
+    "bio": "DevOps engineer with a background in cloud infrastructure and automation. Kubernetes enthusiast.",
+    "dateOfBirth": "1989-09-30",
+    "location": "Boston, MA"
+  },
+  {
+    "id": 6,
+    "firstName": "Sarah",
+    "lastName": "Davis",
+    "bio": "Mobile app developer working with React Native and Flutter. Love building apps that make a difference.",
+    "dateOfBirth": "1993-01-18",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 7,
+    "firstName": "Robert",
+    "lastName": "Miller",
+    "bio": "Backend engineer specializing in microservices architecture and distributed systems.",
+    "dateOfBirth": "1987-12-05",
+    "location": "Chicago, IL"
+  },
+  {
+    "id": 8,
+    "firstName": "Lisa",
+    "lastName": "Wilson",
+    "bio": "Frontend developer with a passion for CSS animations and creating beautiful, performant web experiences.",
+    "dateOfBirth": "1994-04-25",
+    "location": "Denver, CO"
+  }
+]
