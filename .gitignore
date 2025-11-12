@@ -1,0 +1,12 @@
+# Virtual environment
+.venv/
+
+
+
+# Environment variables
+.env
+
+# Ignore user data file
+users.json
+requests.http
+
