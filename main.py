@@ -16,14 +16,26 @@ class UserProfile(BaseModel):
     bio: Optional[str] = None
     dateOfBirth: Optional[date] = None
     location: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
 
 
 def load_users():
     if not os.path.exists(DATA_FILE):
         return []
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        return data if isinstance(data, list) else []
+   # Treat empty or invalid JSON as an empty list
+    try:
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            contents = f.read()
+            if not contents or contents.strip() == "":
+                return []
+            data = json.loads(contents)
+            return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, OSError):
+        # If the file is corrupt or unreadable, return empty list so the app
+        # can continue and we don't crash on first POST. Caller will overwrite
+        # the file when saving users.
+        return []
 
 
 def save_users(users):
@@ -34,7 +46,8 @@ def save_users(users):
 def get_next_id(users):
     if not users:
         return 1
-    existing_ids = [user.get('id', 0) for user in users if isinstance(user.get('id'), int)]
+    existing_ids = [user.get('id', 0)
+                    for user in users if isinstance(user.get('id'), int)]
     return max(existing_ids, default=0) + 1
 
 
@@ -45,21 +58,70 @@ async def create_user_profile(profile: UserProfile):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="firstName and lastName are required and cannot be empty"
         )
-    
+
     users = load_users()
     new_user = {
         "id": get_next_id(users),
         "firstName": profile.firstName.strip(),
         "lastName": profile.lastName.strip()
     }
-    
+
     if profile.bio:
         new_user["bio"] = profile.bio.strip()
     if profile.dateOfBirth:
         new_user["dateOfBirth"] = profile.dateOfBirth.isoformat()
     if profile.location:
         new_user["location"] = profile.location.strip()
-    
+    if profile.email:
+        new_user["email"] = profile.email.strip()
+    if profile.phone:
+        new_user["phone"] = profile.phone.strip()
+
     users.append(new_user)
     save_users(users)
     return new_user
+
+
+@app.get("/api/users")
+async def list_user_profiles():
+    """Return all user profiles stored in users.json."""
+    return load_users()
+
+
+@app.get("/api/users/{user_id}")
+async def get_user_profile(user_id: int):
+    """Return a single user profile by id or 404 if not found."""
+    users = load_users()
+    for user in users:
+        # stored users are dicts with an 'id' key
+        if isinstance(user, dict) and user.get('id') == user_id:
+            return user
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail="User not found")
+
+
+@app.get("/api/users/by-email/{email}")
+async def get_user_by_email(email: str):
+    users = load_users()
+    target = email.strip().lower()
+    for user in users:
+        if isinstance(user, dict) and isinstance(user.get('email'), str):
+            if user.get('email').strip().lower() == target:
+                return user
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail="User not found")
+
+
+@app.get("/api/users/by-phone/{phone}")
+async def get_user_by_phone(phone: str):
+    def normalize(p: str) -> str:
+        return ''.join(ch for ch in p if ch.isdigit())
+
+    users = load_users()
+    target = normalize(phone)
+    for user in users:
+        if isinstance(user, dict) and isinstance(user.get('phone'), str):
+            if normalize(user.get('phone')) == target:
+                return user
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail="User not found")
