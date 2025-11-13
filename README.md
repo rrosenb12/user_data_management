@@ -104,6 +104,83 @@ response = requests.post(
 print(response.json())
 ```
 
+### Update User Profile
+
+**POST** `/api/users/{user_id}`
+
+Update user profile. User ID is not modifiable. On update profile must still contain a first and last name. Submit empty string to delete a profile field. 
+
+**Request Body:**
+```json
+{
+  "firstName": "John",
+  "lastName": "Donne",
+  "bio": "Sonnet writer.",
+  "dateOfBirth": "1572-01-22",
+  "location": "London, England"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Updated user <user_id> profile successfully",
+  "profile" : {
+    "id": 1,
+    "firstName": "John",
+    "lastName": "Donne",
+    "bio": "Sonnet writer.",
+    "dateOfBirth": "1572-01-22",
+    "location": "London, England"
+  }
+}
+```
+
+**Validation Rules:**
+- `firstName`: Optional, if submitted cannot be empty
+- `lastName`: Optional, if submitted cannot be empty
+- `bio`: Optional
+- `dateOfBirth`: Optional, must be a valid date in YYYY-MM-DD format
+- `location`: Optional
+- `email`: Optional
+- `phone`: Optional
+
+**Error Responses:**
+- `404 Not Found`: No user profile associated with provided ID.
+- `422 Unprocessable Entity`: Updated data does not meet validation rules (First and Last name cannot be blank).
+
+## Example Usage
+
+### Using cURL
+
+```bash
+curl -X POST "http://localhost:8000/api/users/1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lastName": "Donne",
+    "bio": "Sonnet writer.",
+    "dateOfBirth": "1572-01-22",
+    "location": "London, England"
+  }'
+```
+
+### Using Python requests
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/api/users/1",
+    json={
+        "lastName": "Donne",
+        "bio": "Sonnet writer.",
+        "dateOfBirth": "1572-01-22",
+        "location": "San Francisco, CA"
+    }
+)
+print(response.json())
+```
+
 ### Delete User Profile
 
 **DELETE** `/api/users/{user_id}`
