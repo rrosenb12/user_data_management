@@ -104,6 +104,42 @@ response = requests.post(
 print(response.json())
 ```
 
+### Delete User Profile
+
+**DELETE** `/api/users/{user_id}`
+
+Delete user profile associated with user_id. This is not reversible!!
+
+
+**Response (200 OK):**
+```json
+{
+  "message": "Deleted user {user_id} profile successfully"
+}
+```
+
+**Error Responses:**
+- `404 Not Found`: No user associated with user_id
+
+
+## Example Usage
+
+### Using cURL
+
+```bash
+curl -X DELETE "http://localhost:8000/api/users/{user_id}" 
+
+### Using Python requests
+
+```python
+import requests
+
+response = requests.delete(
+    "http://localhost:8000/api/users/{user_id}"
+)
+print(response.json())
+```
+
 ## Data Storage
 
 User data is stored in `users.json` file in the project root. The file is automatically created and updated when users are created.

@@ -18,6 +18,7 @@ class UserProfile(BaseModel):
     location: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 def load_users():
@@ -61,7 +62,7 @@ async def create_user_profile(profile: UserProfile):
 
     users = load_users()
     new_user = {
-        "id": get_next_id(users),
+        "id": profile.user_id if profile.user_id else get_next_id(users),
         "firstName": profile.firstName.strip(),
         "lastName": profile.lastName.strip()
     }
@@ -125,3 +126,17 @@ async def get_user_by_phone(phone: str):
                 return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail="User not found")
+
+@app.delete("/api/users/{user_id}")
+async def delete_user_profile(user_id: str | int):
+    users = load_users()
+    for i, user in enumerate(users):
+        if str(user["id"]) == str(user_id):
+            users.pop(i)
+            save_users(users)
+            return {"message": f"Deleted user {user_id} profile successfuly"}
+    
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail="User not found")
+
+        
