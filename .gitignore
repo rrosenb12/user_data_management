@@ -1,5 +1,7 @@
 # Virtual environment
 .venv/
+venv
+
 
 
 
@@ -9,4 +11,6 @@
 # Ignore user data file
 users.json
 requests.http
+
+__pycache__
 
