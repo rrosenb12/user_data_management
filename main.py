@@ -138,7 +138,7 @@ async def get_user_by_phone(phone: str):
                         detail="User not found")
 
 
-@app.post("/api/users/{user_id}", status_code=status.HTTP_200_OK)
+@app.patch("/api/users/{user_id}", status_code=status.HTTP_200_OK)
 async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
     users = load_users()
     user_profile = None

@@ -106,7 +106,7 @@ print(response.json())
 
 ### Update User Profile
 
-**POST** `/api/users/{user_id}`
+**PATCH** `/api/users/{user_id}`
 
 Update user profile. User ID is not modifiable. On update profile must still contain a first and last name. Submit empty string to delete a profile field. 
 
@@ -154,7 +154,7 @@ Update user profile. User ID is not modifiable. On update profile must still con
 ### Using cURL
 
 ```bash
-curl -X POST "http://localhost:8000/api/users/1" \
+curl -X PATCH "http://localhost:8000/api/users/1" \
   -H "Content-Type: application/json" \
   -d '{
     "lastName": "Donne",
@@ -169,7 +169,7 @@ curl -X POST "http://localhost:8000/api/users/1" \
 ```python
 import requests
 
-response = requests.post(
+response = requests.patch(
     "http://localhost:8000/api/users/1",
     json={
         "lastName": "Donne",
