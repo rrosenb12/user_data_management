@@ -62,5 +62,79 @@
     "bio": "Frontend developer with a passion for CSS animations and creating beautiful, performant web experiences.",
     "dateOfBirth": "1994-04-25",
     "location": "Denver, CO"
+  },
+  {
+    "id": 9,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 10,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 11,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 12,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 13,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 14,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 15,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 16,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR"
+  },
+  {
+    "id": 17,
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Backend developer",
+    "dateOfBirth": "1990-05-15",
+    "location": "Portland, OR",
+    "email": "alice.johnson@example.com",
+    "phone": "555-123-4567"
   }
 ]
