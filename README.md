@@ -142,37 +142,6 @@ else:
   print("Error:", resp.status_code, error)
 ```
 
+## UML Diagram
+<img width="1580" height="3660" alt="Sequence diagram" src="https://github.com/user-attachments/assets/bc829195-318a-48ce-89a7-ae09b401a718" />
 
-Below is a simple sequence diagram showing how the test program interacts with this microservice and the local storage file. (Mermaid syntax; if your viewer doesn't render mermaid, treat it as pseudocode.)
-
-```mermaid
-sequenceDiagram
-    participant TestProgram as Test Program
-    participant Service as User Data Service
-    participant File as users.json
-
-    TestProgram->>Service: POST /api/users (create)
-    Service->>File: write new user
-    File-->>Service: OK
-    Service-->>TestProgram: 201 Created + user JSON
-
-    TestProgram->>Service: GET /api/users
-    Service->>File: read all
-    File-->>Service: list
-    Service-->>TestProgram: 200 + list JSON
-
-    TestProgram->>Service: GET /api/users/by-email/{email}
-    Service->>File: read and compare (case-insensitive)
-    File-->>Service: matched user
-    Service-->>TestProgram: 200 + user JSON
-
-    TestProgram->>Service: PATCH /api/users/{id}
-    Service->>File: read, modify, write
-    File-->>Service: OK
-    Service-->>TestProgram: 200 + updated profile
-
-    TestProgram->>Service: DELETE /api/users/{id}
-    Service->>File: read, remove, write
-    File-->>Service: OK
-    Service-->>TestProgram: 200 + message
-```
