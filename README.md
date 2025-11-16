@@ -41,46 +41,6 @@ Endpoints:
 
 
 
-## Example Calls (Programmatic)
-
-Using Python `requests` (create user):
-
-```python
-import requests
-
-BASE = "http://localhost:8000"
-payload = {
-    "firstName": "Alice",
-    "lastName": "Johnson",
-    "email": "alice@example.com",
-    "phone": "(555) 987-6543"
-}
-resp = requests.post(f"{BASE}/api/users", json=payload)
-print(resp.status_code, resp.json())
-```
-
-Using Python `requests` (get by id):
-
-```python
-import requests
-
-BASE = "http://localhost:8000"
-resp = requests.get(f"{BASE}/api/users/1")
-print(resp.status_code, resp.json())
-```
-
-Example successful create response (201):
-
-```json
-{
-  "id": 1,
-  "firstName": "Alice",
-  "lastName": "Johnson",
-  "email": "alice@example.com",
-  "phone": "(555) 987-6543"
-}
-```
-
 ## How to programmatically REQUEST data (examples)
 
 Below are Python `requests` examples that mirror the style used in the other service READMEs. These show how to call each endpoint programmatically.
@@ -182,7 +142,6 @@ else:
   print("Error:", resp.status_code, error)
 ```
 
-## UML Sequence Diagram
 
 Below is a simple sequence diagram showing how the test program interacts with this microservice and the local storage file. (Mermaid syntax; if your viewer doesn't render mermaid, treat it as pseudocode.)
 
