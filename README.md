@@ -1,225 +1,178 @@
 # User Data Management Microservice
 
-A FastAPI-based microservice for managing user data.
+A FastAPI-based microservice for managing user profiles. This README documents the communication contract (endpoints, request/response formats), example calls, a simple UML sequence diagram, and how to run the provided test program that demonstrates the service behavior.
 
-## Setup
+## Communication Contract (Stable)
 
-### Prerequisites
+All endpoints return JSON and use standard HTTP status codes. The contract below must remain stable for teammates to interact with this microservice.
 
-- Python 3.8 or higher
-- pip (Python package manager)
+- Base path: `/api/users`
 
-### Installation
+Endpoints:
 
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+- POST `/api/users`
+  - Purpose: Create a new user profile.
+  - Request JSON fields:
+    - `firstName` (string, required, non-empty)
+    - `lastName` (string, required, non-empty)
+    - `bio` (string, optional)
+    - `dateOfBirth` (YYYY-MM-DD, optional)
+    - `location` (string, optional)
+    - `email` (string, optional)
+    - `phone` (string, optional)
+  - Response: 201 Created with the created user object, including numeric `id`.
+  - Errors: 422 for validation failures.
 
-2. Run the application:
-```bash
-python run.py
-```
+- GET `/api/users`
+  - Purpose: Return a JSON array of all user profiles.
+  - Response: 200 OK with list (may be empty).
 
-Alternatively, you can use:
-```bash
-python -m uvicorn main:app --reload
-```
+- GET `/api/users/{user_id}`
+  - Purpose: Return a single user profile by `id`.
+  - Response: 200 with user object, or 404 if not found.
 
-The API will be available at `http://localhost:8000`
+- GET `/api/users/by-email/{email}`
+  - Purpose: Lookup a user by email (case-insensitive).
+  - Response: 200 with user object, or 404 if not found.
 
-## API Endpoints
+- GET `/api/users/by-phone/{phone}`
+  - Purpose: Lookup a user by phone; service normalizes to digits only before comparison.
+  - Response: 200 with user object, or 404 if not found.
 
-### Create User Profile
 
-**POST** `/api/users`
 
-Create a new user profile. All fields are required.
+## How to programmatically REQUEST data (examples)
 
-**Request Body:**
-```json
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "bio": "Software engineer passionate about building scalable applications.",
-  "dateOfBirth": "1990-01-15",
-  "location": "New York, NY"
-}
-```
+Below are Python `requests` examples that mirror the style used in the other service READMEs. These show how to call each endpoint programmatically.
 
-**Response (201 Created):**
-```json
-{
-  "id": 1,
-  "firstName": "John",
-  "lastName": "Doe",
-  "bio": "Software engineer passionate about building scalable applications.",
-  "dateOfBirth": "1990-01-15",
-  "location": "New York, NY"
-}
-```
-
-**Validation Rules:**
-- `firstName`: Required, cannot be empty
-- `lastName`: Required, cannot be empty
-- `bio`: Optional
-- `dateOfBirth`: Optional, must be a valid date in YYYY-MM-DD format
-- `location`: Optional
-
-**Error Responses:**
-- `422 Unprocessable Entity`: Validation errors with detailed messages
-- `500 Internal Server Error`: Server errors
-
-## Example Usage
-
-### Using cURL
-
-```bash
-curl -X POST "http://localhost:8000/api/users" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "firstName": "Alice",
-    "lastName": "Johnson",
-    "bio": "Product manager with 5 years of experience in tech startups.",
-    "dateOfBirth": "1985-06-20",
-    "location": "San Francisco, CA"
-  }'
-```
-
-### Using Python requests
+Create user example:
 
 ```python
 import requests
 
-response = requests.post(
-    "http://localhost:8000/api/users",
-    json={
-        "firstName": "Alice",
-        "lastName": "Johnson",
-        "bio": "Product manager with 5 years of experience in tech startups.",
-        "dateOfBirth": "1985-06-20",
-        "location": "San Francisco, CA"
-    }
-)
-print(response.json())
-```
-
-### Update User Profile
-
-**PATCH** `/api/users/{user_id}`
-
-Update user profile. User ID is not modifiable. On update profile must still contain a first and last name. Submit empty string to delete a profile field. 
-
-**Request Body:**
-```json
-{
-  "firstName": "John",
-  "lastName": "Donne",
-  "bio": "Sonnet writer.",
-  "dateOfBirth": "1572-01-22",
-  "location": "London, England"
+BASE = "http://localhost:8000"
+payload = {
+  "firstName": "Charlie",
+  "lastName": "Example",
+  "email": "charlie@example.com",
+  "phone": "555-000-1111"
 }
+resp = requests.post(f"{BASE}/api/users", json=payload, timeout=5)
+print(resp.status_code)
+print(resp.json())
+# On success (201): the created user object with an `id` field is returned
 ```
 
-**Response (200 OK):**
-```json
-{
-  "message": "Updated user <user_id> profile successfully",
-  "profile" : {
-    "id": 1,
-    "firstName": "John",
-    "lastName": "Donne",
-    "bio": "Sonnet writer.",
-    "dateOfBirth": "1572-01-22",
-    "location": "London, England"
-  }
-}
-```
-
-**Validation Rules:**
-- `firstName`: Optional, if submitted cannot be empty
-- `lastName`: Optional, if submitted cannot be empty
-- `bio`: Optional
-- `dateOfBirth`: Optional, must be a valid date in YYYY-MM-DD format
-- `location`: Optional
-- `email`: Optional
-- `phone`: Optional
-
-**Error Responses:**
-- `404 Not Found`: No user profile associated with provided ID.
-- `422 Unprocessable Entity`: Updated data does not meet validation rules (First and Last name cannot be blank).
-
-## Example Usage
-
-### Using cURL
-
-```bash
-curl -X PATCH "http://localhost:8000/api/users/1" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "lastName": "Donne",
-    "bio": "Sonnet writer.",
-    "dateOfBirth": "1572-01-22",
-    "location": "London, England"
-  }'
-```
-
-### Using Python requests
+Get user by id example:
 
 ```python
 import requests
 
-response = requests.patch(
-    "http://localhost:8000/api/users/1",
-    json={
-        "lastName": "Donne",
-        "bio": "Sonnet writer.",
-        "dateOfBirth": "1572-01-22",
-        "location": "San Francisco, CA"
-    }
-)
-print(response.json())
+BASE = "http://localhost:8000"
+user_id = 1
+resp = requests.get(f"{BASE}/api/users/{user_id}", timeout=5)
+print(resp.status_code)
+print(resp.json())
+# 200 -> user object, 404 -> {'detail': 'User not found'}
 ```
 
-### Delete User Profile
-
-**DELETE** `/api/users/{user_id}`
-
-Delete user profile associated with user_id. This is not reversible!!
-
-
-**Response (200 OK):**
-```json
-{
-  "message": "Deleted user {user_id} profile successfully"
-}
-```
-
-**Error Responses:**
-- `404 Not Found`: No user associated with user_id
-
-
-## Example Usage
-
-### Using cURL
-
-```bash
-curl -X DELETE "http://localhost:8000/api/users/{user_id}" 
-
-### Using Python requests
+Get user by email example (case-insensitive):
 
 ```python
 import requests
 
-response = requests.delete(
-    "http://localhost:8000/api/users/{user_id}"
-)
-print(response.json())
+BASE = "http://localhost:8000"
+email = "Charlie@Example.com"
+resp = requests.get(f"{BASE}/api/users/by-email/{email}", timeout=5)
+print(resp.status_code)
+print(resp.json())
 ```
 
-## Data Storage
+Get user by phone (numeric normalization):
 
-User data is stored in `users.json` file in the project root. The file is automatically created and updated when users are created.
-### UML Diagram
-<img width="1580" height="3660" alt="Sequence diagram" src="https://github.com/user-attachments/assets/9a38153d-f7ec-4313-b046-d7555cac6e0d" />
+```python
+import requests
 
+BASE = "http://localhost:8000"
+phone = "(555)000-1111"
+resp = requests.get(f"{BASE}/api/users/by-phone/{phone}", timeout=5)
+print(resp.status_code)
+print(resp.json())
+```
+
+Update user (PATCH) example:
+
+```python
+import requests
+
+BASE = "http://localhost:8000"
+user_id = 1
+payload = {"lastName": "Updated"}
+resp = requests.patch(f"{BASE}/api/users/{user_id}", json=payload, timeout=5)
+print(resp.status_code)
+print(resp.json())
+```
+
+Delete user example:
+
+```python
+import requests
+
+BASE = "http://localhost:8000"
+user_id = 1
+resp = requests.delete(f"{BASE}/api/users/{user_id}", timeout=5)
+print(resp.status_code)
+print(resp.json())
+```
+
+## How to programmatically RECEIVE and parse data
+
+When calling the service from Python, always check the response status code before using `resp.json()`.
+
+```python
+resp = requests.post(f"http://localhost:8000/api/users", json=payload, timeout=5)
+if resp.status_code in (200, 201):
+  data = resp.json()
+  # handle success
+else:
+  try:
+    error = resp.json().get("detail")
+  except Exception:
+    error = resp.text
+  print("Error:", resp.status_code, error)
+```
+
+
+Below is a simple sequence diagram showing how the test program interacts with this microservice and the local storage file. (Mermaid syntax; if your viewer doesn't render mermaid, treat it as pseudocode.)
+
+```mermaid
+sequenceDiagram
+    participant TestProgram as Test Program
+    participant Service as User Data Service
+    participant File as users.json
+
+    TestProgram->>Service: POST /api/users (create)
+    Service->>File: write new user
+    File-->>Service: OK
+    Service-->>TestProgram: 201 Created + user JSON
+
+    TestProgram->>Service: GET /api/users
+    Service->>File: read all
+    File-->>Service: list
+    Service-->>TestProgram: 200 + list JSON
+
+    TestProgram->>Service: GET /api/users/by-email/{email}
+    Service->>File: read and compare (case-insensitive)
+    File-->>Service: matched user
+    Service-->>TestProgram: 200 + user JSON
+
+    TestProgram->>Service: PATCH /api/users/{id}
+    Service->>File: read, modify, write
+    File-->>Service: OK
+    Service-->>TestProgram: 200 + updated profile
+
+    TestProgram->>Service: DELETE /api/users/{id}
+    Service->>File: read, remove, write
+    File-->>Service: OK
+    Service-->>TestProgram: 200 + message
+```
