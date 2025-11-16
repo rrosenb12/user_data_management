@@ -220,3 +220,6 @@ print(response.json())
 ## Data Storage
 
 User data is stored in `users.json` file in the project root. The file is automatically created and updated when users are created.
+### UML Diagram
+<img width="1580" height="3660" alt="Sequence diagram" src="https://github.com/user-attachments/assets/9a38153d-f7ec-4313-b046-d7555cac6e0d" />
+
