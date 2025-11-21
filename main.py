@@ -80,10 +80,10 @@ class UserSearchCriteria:
 
 def find_user_by_normalized_field(criteria):
     """Find a user by comparing normalized field values.
-    
+
     Args:
         criteria: UserSearchCriteria object containing search parameters.
-        
+
     Returns:
         User dictionary if found, None otherwise.
     """
