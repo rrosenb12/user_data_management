@@ -21,7 +21,7 @@ class UserProfile(BaseModel):
         location: Optional location information.
         email: Optional email address.
         phone: Optional phone number.
-        user_id: Optional user-provided ID
+        user_id: Optional user-provided ID.
     """
     firstName: str
     lastName: str
