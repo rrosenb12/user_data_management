@@ -62,6 +62,23 @@ def get_next_id(users):
     return max(existing_ids, default=0) + 1
 
 
+def create_base_user_dict(profile, users):
+    """Create base user dictionary with required fields and ID.
+    
+    Args:
+        profile: UserProfile object containing user data.
+        users: List of existing users (used for ID generation).
+        
+    Returns:
+        Dictionary with id, firstName, and lastName fields.
+    """
+    return {
+        "id": profile.user_id if profile.user_id else get_next_id(users),
+        "firstName": profile.firstName.strip(),
+        "lastName": profile.lastName.strip()
+    }
+
+
 @app.post("/api/users", status_code=status.HTTP_201_CREATED)
 async def create_user_profile(profile: UserProfile):
     if not profile.firstName.strip() or not profile.lastName.strip():
@@ -71,11 +88,7 @@ async def create_user_profile(profile: UserProfile):
         )
 
     users = load_users()
-    new_user = {
-        "id": profile.user_id if profile.user_id else get_next_id(users),
-        "firstName": profile.firstName.strip(),
-        "lastName": profile.lastName.strip()
-    }
+    new_user = create_base_user_dict(profile, users)
 
     if profile.bio:
         new_user["bio"] = profile.bio.strip()
