@@ -7,7 +7,7 @@ import os
 
 app = FastAPI(docs=None, redoc=None)
 
-DATA_FILE = "users.json"
+USER_DATA_FILE = "users.json"
 
 
 class UserProfile(BaseModel):
