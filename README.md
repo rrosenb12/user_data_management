@@ -1,6 +1,6 @@
 # User Data Management Microservice
 
-A FastAPI-based microservice for managing user profiles. This README documents the communication contract (endpoints, request/response formats), example calls, a simple UML sequence diagram, and how to run the provided test program that demonstrates the service behavior.
+A FastAPI-based microservice for managing program-specific user data. This README documents the communication contract (endpoints, request/response formats), example calls, a simple UML sequence diagram, and how to run the provided test program that demonstrates the service behavior.
 
 ## Communication Contract (Stable)
 
