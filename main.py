@@ -31,17 +31,29 @@ class UserProfileUpdate(BaseModel):
     phone: Optional[str] = None
 
 
+def read_json_file(filepath):
+    """Read and parse JSON data from file.
+    
+    Args:
+        filepath: Path to the JSON file to read.
+        
+    Returns:
+        Parsed JSON data, or empty list if file is empty or invalid.
+    """
+    with open(filepath, 'r', encoding='utf-8') as f:
+        contents = f.read()
+        if not contents or contents.strip() == "":
+            return []
+        data = json.loads(contents)
+        return data if isinstance(data, list) else []
+
+
 def load_users():
     if not os.path.exists(DATA_FILE):
         return []
-   # Treat empty or invalid JSON as an empty list
+    # Treat empty or invalid JSON as an empty list
     try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            contents = f.read()
-            if not contents or contents.strip() == "":
-                return []
-            data = json.loads(contents)
-            return data if isinstance(data, list) else []
+        return read_json_file(DATA_FILE)
     except (json.JSONDecodeError, OSError):
         # If the file is corrupt or unreadable, return empty list so the app
         # can continue and we don't crash on first POST. Caller will overwrite
