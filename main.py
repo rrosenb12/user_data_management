@@ -11,6 +11,20 @@ DATA_FILE = "users.json"
 
 
 class UserProfile(BaseModel):
+    """User profile data model for creating new user profiles.
+
+    Attributes:
+        firstName: User's first name (required).
+        lastName: User's last name (required).
+        bio: Optional biography or description text.
+        dateOfBirth: Optional date of birth.
+        location: Optional location information.
+        email: Optional email address.
+        phone: Optional phone number.
+        user_id: Optional user-provided ID. If not provided, an ID will be
+            automatically generated during profile creation using sequential
+            numbering based on existing user IDs.
+    """
     firstName: str
     lastName: str
     bio: Optional[str] = None
