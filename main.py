@@ -62,6 +62,39 @@ def get_next_id(users):
     return max(existing_ids, default=0) + 1
 
 
+class UserSearchCriteria:
+    """Encapsulates criteria for searching users by a normalized field.
+
+    Attributes:
+        users: List of user dictionaries to search.
+        field_name: Name of the field to search (e.g., 'phone', 'email').
+        search_value: The value to search for.
+        normalize_func: Function to normalize both stored and search values.
+    """
+    def __init__(self, users, field_name, search_value, normalize_func):
+        self.users = users
+        self.field_name = field_name
+        self.search_value = search_value
+        self.normalize_func = normalize_func
+
+
+def find_user_by_normalized_field(criteria):
+    """Find a user by comparing normalized field values.
+    
+    Args:
+        criteria: UserSearchCriteria object containing search parameters.
+        
+    Returns:
+        User dictionary if found, None otherwise.
+    """
+    target = criteria.normalize_func(criteria.search_value)
+    for user in criteria.users:
+        if isinstance(user, dict) and isinstance(user.get(criteria.field_name), str):
+            if criteria.normalize_func(user.get(criteria.field_name)) == target:
+                return user
+    return None
+
+
 @app.post("/api/users", status_code=status.HTTP_201_CREATED)
 async def create_user_profile(profile: UserProfile):
     if not profile.firstName.strip() or not profile.lastName.strip():
@@ -129,11 +162,11 @@ async def get_user_by_phone(phone: str):
         return ''.join(ch for ch in p if ch.isdigit())
 
     users = load_users()
-    target = normalize(phone)
-    for user in users:
-        if isinstance(user, dict) and isinstance(user.get('phone'), str):
-            if normalize(user.get('phone')) == target:
-                return user
+    criteria = UserSearchCriteria(users, 'phone', phone, normalize)
+    user = find_user_by_normalized_field(criteria)
+
+    if user:
+        return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail="User not found")
 
