@@ -32,11 +32,11 @@ class UserProfileUpdate(BaseModel):
 
 
 def load_users():
-    if not os.path.exists(DATA_FILE):
+    if not os.path.exists(USER_DATA_FILE):
         return []
    # Treat empty or invalid JSON as an empty list
     try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        with open(USER_DATA_FILE, 'r', encoding='utf-8') as f:
             contents = f.read()
             if not contents or contents.strip() == "":
                 return []
@@ -50,7 +50,7 @@ def load_users():
 
 
 def save_users(users):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+    with open(USER_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(users, f, indent=2, ensure_ascii=False)
 
 
