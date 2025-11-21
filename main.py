@@ -158,8 +158,9 @@ async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
     if profile.firstName is not None:
         firstName = profile.firstName.strip()
         if firstName == "":
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                detail="First name cannot be blank")
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="First name cannot be blank")
         user_profile["firstName"] = firstName
     if profile.lastName is not None:
         lastName = profile.lastName.strip()
