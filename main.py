@@ -183,7 +183,6 @@ async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
                 detail="Last name cannot be blank",
             )
         user_profile["lastName"] = lastName
-    
     add_optional_fields(user_profile, profile)
 
     # Delete any empty dict entries
