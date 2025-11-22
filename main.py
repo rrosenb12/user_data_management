@@ -11,18 +11,7 @@ DATA_FILE = "users.json"
 
 
 class UserProfile(BaseModel):
-    """User profile data model for creating new user profiles.
-
-    Attributes:
-        firstName: User's first name (required).
-        lastName: User's last name (required).
-        bio: Optional biography or description text.
-        dateOfBirth: Optional date of birth.
-        location: Optional location information.
-        email: Optional email address.
-        phone: Optional phone number.
-        user_id: Optional user-provided ID.
-    """
+    """Data model for creating new user profiles."""
     firstName: str
     lastName: str
     bio: Optional[str] = None
@@ -34,19 +23,10 @@ class UserProfile(BaseModel):
 
 
 class UserProfileUpdate(BaseModel):
-    """User profile update model for partial profile updates.
+    """Data model for partial profile updates.
 
     All fields are optional to support HTTP PATCH semantics.
     Only provided fields will be updated in the user profile.
-
-    Attributes:
-        firstName: Updated first name.
-        lastName: Updated last name.
-        bio: Updated biography text.
-        dateOfBirth: Updated date of birth.
-        location: Updated location.
-        email: Updated email address.
-        phone: Updated phone number.
     """
     firstName: Optional[str] = None
     lastName: Optional[str] = None
@@ -58,15 +38,14 @@ class UserProfileUpdate(BaseModel):
 
 
 def load_users():
-    """Load user profiles from the JSON data file.
+    """Read profiles from JSON as list of dicts.
 
-    Returns:
-        List of user profile dictionaries. Returns empty list if file
-        does not exist, is empty, or contains invalid JSON.
+    Returns empty list if file is nonexistant, empty, or invalid.
+    Avoids crash; caller will overwrite file when saving users.
     """
     if not os.path.exists(DATA_FILE):
         return []
-   # Treat empty or invalid JSON as an empty list
+    # Treat empty or invalid JSON as an empty list
     try:
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             contents = f.read()
@@ -75,31 +54,24 @@ def load_users():
             data = json.loads(contents)
             return data if isinstance(data, list) else []
     except (json.JSONDecodeError, OSError):
-        # If the file is corrupt or unreadable, return empty list so the app
-        # can continue and we don't crash on first POST. Caller will overwrite
-        # the file when saving users.
         return []
 
 
 def save_users(users):
-    """Save user profiles to the JSON data file.
+    """Write all profiles to JSON.
 
-    Args:
-        users: List of user profile dictionaries to save.
+    Input:
+        Collection of profiles (list of dicts).
     """
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(users, f, indent=2, ensure_ascii=False)
 
 
 def get_next_id(users):
-    """Generate the next sequential user ID.
+    """Generate next incremental/sequential user ID.
 
-    Args:
-        users: List of existing user profile dictionaries.
-
-    Returns:
-        Integer ID one greater than the maximum existing ID,
-        or 1 if no users exist.
+    Input:
+        Collection of user profiles (list of dicts).
     """
     if not users:
         return 1
@@ -110,20 +82,10 @@ def get_next_id(users):
 
 @app.post("/api/users", status_code=status.HTTP_201_CREATED)
 async def create_user_profile(profile: UserProfile):
-    """Create a new user profile.
-
-    Args:
-        profile: UserProfile object containing user data.
-
-    Returns:
-        Dictionary containing the created user profile with assigned ID.
-
-    Raises:
-        HTTPException: 422 if firstName or lastName are empty.
+    """Generate a dict containing profile data.
 
     Note:
-        If user_id is provided in profile, it will be used instead of
-        auto-generated ID.
+        ID provided in profile will supersede auto-generated ID.
     """
     if not profile.firstName.strip() or not profile.lastName.strip():
         raise HTTPException(
@@ -174,20 +136,7 @@ async def get_user_profile(user_id: int):
 
 @app.get("/api/users/by-email/{email}")
 async def get_user_by_email(email: str):
-    """Return a user profile by email address.
-
-    Args:
-        email: Email address to search for.
-
-    Returns:
-        Dictionary containing the user profile.
-
-    Raises:
-        HTTPException: 404 if no user found with that email.
-
-    Note:
-        Performs case-insensitive email comparison.
-    """
+    """Return a profile by email address."""
     users = load_users()
     target = email.strip().lower()
     for user in users:
@@ -200,20 +149,10 @@ async def get_user_by_email(email: str):
 
 @app.get("/api/users/by-phone/{phone}")
 async def get_user_by_phone(phone: str):
-    """Return a user profile by phone number.
-
-    Args:
-        phone: Phone number to search for.
-
-    Returns:
-        Dictionary containing the user profile.
-
-    Raises:
-        HTTPException: 404 if no user found with that phone number.
+    """Return a profile by phone number.
 
     Note:
-        Normalizes phone numbers by comparing only digits,
-        ignoring formatting characters.
+        Normalization only compares digits.
     """
     def normalize(p: str) -> str:
         return ''.join(ch for ch in p if ch.isdigit())
@@ -232,17 +171,8 @@ async def get_user_by_phone(phone: str):
 async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
     """Update an existing user profile with provided fields.
 
-    Args:
-        profile: UserProfileUpdate object with fields to update.
-        user_id: ID of the user to update (accepts string or int).
-
     Returns:
         Dictionary with success message and updated profile.
-
-    Raises:
-        HTTPException: 404 if user not found.
-        HTTPException: 422 if firstName or lastName are set to blank.
-
     Note:
         Only updates fields that are provided (not None).
         Empty string fields are removed from profile.
@@ -304,15 +234,6 @@ async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
 @app.delete("/api/users/{user_id}")
 async def delete_user_profile(user_id: str | int):
     """Delete a user profile by ID.
-
-    Args:
-        user_id: ID of the user to delete (accepts string or int).
-
-    Returns:
-        Dictionary with success message.
-
-    Raises:
-        HTTPException: 404 if user not found.
 
     Note:
         Permanently removes user from storage.
