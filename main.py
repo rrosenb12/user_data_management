@@ -34,7 +34,7 @@ class UserProfileUpdate(BaseModel):
 def load_users():
     if not os.path.exists(DATA_FILE):
         return []
-   # Treat empty or invalid JSON as an empty list
+    # Treat empty or invalid JSON as an empty list
     try:
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             contents = f.read()
@@ -60,6 +60,30 @@ def get_next_id(users):
     existing_ids = [user.get('id', 0)
                     for user in users if isinstance(user.get('id'), int)]
     return max(existing_ids, default=0) + 1
+
+
+def _apply_update_field(profile_field, field_name: str, user_profile: dict) -> None:
+    if profile_field is None:
+        return
+
+    # Normalize string fields
+    if isinstance(profile_field, str):
+        value = profile_field.strip()
+    else:
+        value = profile_field
+
+    # Validate required name fields
+    if field_name in ("firstName", "lastName") and value == "":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"{field_name} cannot be blank",
+        )
+
+    # Convert date to ISO format if needed
+    if field_name == "dateOfBirth" and value is not None:
+        value = value.isoformat()
+
+    user_profile[field_name] = value
 
 
 @app.post("/api/users", status_code=status.HTTP_201_CREATED)
@@ -143,55 +167,39 @@ async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
     users = load_users()
     user_profile = None
 
-    # Pull user profile by user_id
+    # Find the matching user
     for user in users:
-        # stored users are dicts with an 'id' key
-        if isinstance(user, dict) and str(user.get('id')) == str(user_id):
+        if isinstance(user, dict) and str(user.get("id")) == str(user_id):
             user_profile = user
             break
 
-    if not user_profile:    
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="User not found")
+    if not user_profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
 
-    # Add update info to profile dict
-    if profile.firstName is not None:
-        firstName = profile.firstName.strip()
-        if firstName == "":
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                detail="First name cannot be blank")
-        user_profile["firstName"] = firstName
-    if profile.lastName is not None:
-        lastName = profile.lastName.strip()
-        if lastName == "":
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Last name cannot be blank",
-            )
-        user_profile["lastName"] = lastName
-    if profile.bio is not None:
-        user_profile["bio"] = profile.bio.strip()
-    if profile.dateOfBirth is not None:
-        user_profile["dateOfBirth"] = profile.dateOfBirth.isoformat()
-    if profile.location is not None:
-        user_profile["location"] = profile.location.strip()
-    if profile.email is not None:
-        user_profile["email"] = profile.email.strip()
-    if profile.phone is not None:
-        user_profile["phone"] = profile.phone.strip()
+    # Apply profile updates using helper
+    _apply_update_field(profile.firstName, "firstName", user_profile)
+    _apply_update_field(profile.lastName, "lastName", user_profile)
+    _apply_update_field(profile.bio, "bio", user_profile)
+    _apply_update_field(profile.dateOfBirth, "dateOfBirth", user_profile)
+    _apply_update_field(profile.location, "location", user_profile)
+    _apply_update_field(profile.email, "email", user_profile)
+    _apply_update_field(profile.phone, "phone", user_profile)
 
-    # Delete any empty dict entries
+    # Remove empty values
     for key in list(user_profile.keys()):
         val = user_profile.get(key)
-        if val is None or str(val).strip() == "":
+        if val is None or (isinstance(val, str) and val.strip() == ""):
             user_profile.pop(key, None)
 
-    # Save updated profiles to file
     save_users(users)
 
-    return {"message": f"Updated user {user_id} profile successfully",
-            "profile": user_profile,
-            }
+    return {
+        "message": f"Updated user {user_id} profile successfully",
+        "profile": user_profile,
+    }
 
 
 @app.delete("/api/users/{user_id}")
