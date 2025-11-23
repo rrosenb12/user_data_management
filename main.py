@@ -85,6 +85,30 @@ def get_next_id(users):
     return max(existing_ids, default=0) + 1
 
 
+def add_optional_fields(user_dict, profile, allow_empty=False):
+    """Add optional profile fields to user dictionary if present.
+
+    Args:
+        user_dict: Target dictionary to update with optional fields.
+        profile: UserProfile or UserProfileUpdate object with optional fields.
+        allow_empty: If True, allow empty strings to be set (for clearing fields).
+
+    Note:
+        Only adds fields that are present (not None). String fields are
+        stripped of whitespace. Dates are converted to ISO format strings.
+    """
+    if (profile.bio is not None) if allow_empty else profile.bio:
+        user_dict["bio"] = profile.bio.strip() if profile.bio is not None else ""
+    if (profile.dateOfBirth is not None) if allow_empty else profile.dateOfBirth:
+        user_dict["dateOfBirth"] = profile.dateOfBirth.isoformat() if profile.dateOfBirth is not None else ""
+    if (profile.location is not None) if allow_empty else profile.location:
+        user_dict["location"] = profile.location.strip() if profile.location is not None else ""
+    if (profile.email is not None) if allow_empty else profile.email:
+        user_dict["email"] = profile.email.strip() if profile.email is not None else ""
+    if (profile.phone is not None) if allow_empty else profile.phone:
+        user_dict["phone"] = profile.phone.strip() if profile.phone is not None else ""
+
+
 @app.post("/api/users", status_code=status.HTTP_201_CREATED)
 async def create_user_profile(profile: UserProfile):
     """Generate a dict containing profile data.
@@ -105,16 +129,7 @@ async def create_user_profile(profile: UserProfile):
         "lastName": profile.lastName.strip()
     }
 
-    if profile.bio:
-        new_user["bio"] = profile.bio.strip()
-    if profile.dateOfBirth:
-        new_user["dateOfBirth"] = profile.dateOfBirth.isoformat()
-    if profile.location:
-        new_user["location"] = profile.location.strip()
-    if profile.email:
-        new_user["email"] = profile.email.strip()
-    if profile.phone:
-        new_user["phone"] = profile.phone.strip()
+    add_optional_fields(new_user, profile)
 
     users.append(new_user)
     save_users(users)
@@ -212,16 +227,7 @@ async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
                 detail="Last name cannot be blank",
             )
         user_profile["lastName"] = lastName
-    if profile.bio is not None:
-        user_profile["bio"] = profile.bio.strip()
-    if profile.dateOfBirth is not None:
-        user_profile["dateOfBirth"] = profile.dateOfBirth.isoformat()
-    if profile.location is not None:
-        user_profile["location"] = profile.location.strip()
-    if profile.email is not None:
-        user_profile["email"] = profile.email.strip()
-    if profile.phone is not None:
-        user_profile["phone"] = profile.phone.strip()
+    add_optional_fields(user_profile, profile)
 
     # Delete any empty dict entries
     for key in list(user_profile.keys()):
