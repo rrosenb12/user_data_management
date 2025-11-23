@@ -37,6 +37,16 @@ class UserProfileUpdate(BaseModel):
     phone: Optional[str] = None
 
 
+def read_json_file(filepath):
+    """Read and parse JSON data from file."""
+    with open(filepath, 'r', encoding='utf-8') as f:
+        contents = f.read()
+        if not contents or contents.strip() == "":
+            return []
+        data = json.loads(contents)
+        return data if isinstance(data, list) else []
+
+
 def load_users():
     """Read profiles from JSON as list of dicts.
 
@@ -47,12 +57,7 @@ def load_users():
         return []
     # Treat empty or invalid JSON as an empty list
     try:
-        with open(USER_DATA_FILE, 'r', encoding='utf-8') as f:
-            contents = f.read()
-            if not contents or contents.strip() == "":
-                return []
-            data = json.loads(contents)
-            return data if isinstance(data, list) else []
+        return read_json_file(DATA_FILE)
     except (json.JSONDecodeError, OSError):
         return []
 
