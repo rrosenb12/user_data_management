@@ -7,24 +7,11 @@ import os
 
 app = FastAPI(docs=None, redoc=None)
 
-DATA_FILE = "users.json"
+USER_DATA_FILE = "users.json"
 
 
 class UserProfile(BaseModel):
-    """User profile data model for creating new user profiles.
-
-    Attributes:
-        firstName: User's first name (required).
-        lastName: User's last name (required).
-        bio: Optional biography or description text.
-        dateOfBirth: Optional date of birth.
-        location: Optional location information.
-        email: Optional email address.
-        phone: Optional phone number.
-        user_id: Optional user-provided ID. If not provided, an ID will be
-            automatically generated during profile creation using sequential
-            numbering based on existing user IDs.
-    """
+    """Data model for creating new user profiles."""
     firstName: str
     lastName: str
     bio: Optional[str] = None
@@ -36,6 +23,11 @@ class UserProfile(BaseModel):
 
 
 class UserProfileUpdate(BaseModel):
+    """Data model for partial profile updates.
+
+    All fields are optional to support HTTP PATCH semantics.
+    Only provided fields will be updated in the user profile.
+    """
     firstName: Optional[str] = None
     lastName: Optional[str] = None
     bio: Optional[str] = None
@@ -46,29 +38,41 @@ class UserProfileUpdate(BaseModel):
 
 
 def load_users():
+    """Read profiles from JSON as list of dicts.
+
+    Returns empty list if file is nonexistant, empty, or invalid.
+    Avoids crash; caller will overwrite file when saving users.
+    """
     if not os.path.exists(DATA_FILE):
         return []
-   # Treat empty or invalid JSON as an empty list
+    # Treat empty or invalid JSON as an empty list
     try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        with open(USER_DATA_FILE, 'r', encoding='utf-8') as f:
             contents = f.read()
             if not contents or contents.strip() == "":
                 return []
             data = json.loads(contents)
             return data if isinstance(data, list) else []
     except (json.JSONDecodeError, OSError):
-        # If the file is corrupt or unreadable, return empty list so the app
-        # can continue and we don't crash on first POST. Caller will overwrite
-        # the file when saving users.
         return []
 
 
 def save_users(users):
+    """Write all profiles to JSON.
+
+    Input:
+        Collection of profiles (list of dicts).
+    """
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(users, f, indent=2, ensure_ascii=False)
 
 
 def get_next_id(users):
+    """Generate next incremental/sequential user ID.
+
+    Input:
+        Collection of user profiles (list of dicts).
+    """
     if not users:
         return 1
     existing_ids = [user.get('id', 0)
@@ -78,6 +82,11 @@ def get_next_id(users):
 
 @app.post("/api/users", status_code=status.HTTP_201_CREATED)
 async def create_user_profile(profile: UserProfile):
+    """Generate a dict containing profile data.
+
+    Note:
+        ID provided in profile will supersede auto-generated ID.
+    """
     if not profile.firstName.strip() or not profile.lastName.strip():
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -127,6 +136,7 @@ async def get_user_profile(user_id: int):
 
 @app.get("/api/users/by-email/{email}")
 async def get_user_by_email(email: str):
+    """Return a profile by email address."""
     users = load_users()
     target = email.strip().lower()
     for user in users:
@@ -139,6 +149,11 @@ async def get_user_by_email(email: str):
 
 @app.get("/api/users/by-phone/{phone}")
 async def get_user_by_phone(phone: str):
+    """Return a profile by phone number.
+
+    Note:
+        Normalization only compares digits.
+    """
     def normalize(p: str) -> str:
         return ''.join(ch for ch in p if ch.isdigit())
 
@@ -154,6 +169,14 @@ async def get_user_by_phone(phone: str):
 
 @app.patch("/api/users/{user_id}", status_code=status.HTTP_200_OK)
 async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
+    """Update an existing user profile with provided fields.
+
+    Returns:
+        Dictionary with success message and updated profile.
+    Note:
+        Only updates fields that are provided (not None).
+        Empty string fields are removed from profile.
+    """
     users = load_users()
     user_profile = None
 
@@ -210,6 +233,11 @@ async def update_user_profile(profile: UserProfileUpdate, user_id: str | int):
 
 @app.delete("/api/users/{user_id}")
 async def delete_user_profile(user_id: str | int):
+    """Delete a user profile by ID.
+
+    Note:
+        Permanently removes user from storage.
+    """
     users = load_users()
     for i, user in enumerate(users):
         if str(user["id"]) == str(user_id):
