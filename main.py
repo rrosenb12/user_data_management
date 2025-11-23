@@ -7,7 +7,7 @@ import os
 
 app = FastAPI(docs=None, redoc=None)
 
-DATA_FILE = "users.json"
+USER_DATA_FILE = "users.json"
 
 
 class UserProfile(BaseModel):
@@ -47,7 +47,7 @@ def load_users():
         return []
     # Treat empty or invalid JSON as an empty list
     try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        with open(USER_DATA_FILE, 'r', encoding='utf-8') as f:
             contents = f.read()
             if not contents or contents.strip() == "":
                 return []
