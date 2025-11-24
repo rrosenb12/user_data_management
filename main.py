@@ -85,28 +85,21 @@ def get_next_id(users):
     return max(existing_ids, default=0) + 1
 
 
-def add_optional_fields(user_dict, profile, allow_empty=False):
-    """Add optional profile fields to user dictionary if present.
-
+def create_base_user_dict(profile, users):
+    """Create base user dictionary with required fields and ID.
+    
     Args:
-        user_dict: Target dictionary to update with optional fields.
-        profile: UserProfile or UserProfileUpdate object with optional fields.
-        allow_empty: If True, allow empty strings to be set (for clearing fields).
-
-    Note:
-        Only adds fields that are present (not None). String fields are
-        stripped of whitespace. Dates are converted to ISO format strings.
+        profile: UserProfile object containing user data.
+        users: List of existing users (used for ID generation).
+        
+    Returns:
+        Dictionary with id, firstName, and lastName fields.
     """
-    if (profile.bio is not None) if allow_empty else profile.bio:
-        user_dict["bio"] = profile.bio.strip() if profile.bio is not None else ""
-    if (profile.dateOfBirth is not None) if allow_empty else profile.dateOfBirth:
-        user_dict["dateOfBirth"] = profile.dateOfBirth.isoformat() if profile.dateOfBirth is not None else ""
-    if (profile.location is not None) if allow_empty else profile.location:
-        user_dict["location"] = profile.location.strip() if profile.location is not None else ""
-    if (profile.email is not None) if allow_empty else profile.email:
-        user_dict["email"] = profile.email.strip() if profile.email is not None else ""
-    if (profile.phone is not None) if allow_empty else profile.phone:
-        user_dict["phone"] = profile.phone.strip() if profile.phone is not None else ""
+    return {
+        "id": profile.user_id if profile.user_id else get_next_id(users),
+        "firstName": profile.firstName.strip(),
+        "lastName": profile.lastName.strip()
+    }
 
 
 @app.post("/api/users", status_code=status.HTTP_201_CREATED)
@@ -123,11 +116,7 @@ async def create_user_profile(profile: UserProfile):
         )
 
     users = load_users()
-    new_user = {
-        "id": profile.user_id if profile.user_id else get_next_id(users),
-        "firstName": profile.firstName.strip(),
-        "lastName": profile.lastName.strip()
-    }
+    new_user = create_base_user_dict(profile, users)
 
     add_optional_fields(new_user, profile)
 
